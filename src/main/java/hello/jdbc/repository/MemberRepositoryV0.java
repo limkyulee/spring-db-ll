@@ -83,9 +83,7 @@ public class MemberRepositoryV0 {
 
     private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
         if(rs != null) {
-            try{
-                rs.close();
-            }catch (SQLException e){
+            try catch (SQLException e){
                 log.error("[DB ResultSet Error] ", e);
             }
         }
