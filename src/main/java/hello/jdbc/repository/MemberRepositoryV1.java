@@ -7,38 +7,41 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
+import javax.sql.DataSource;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.support.JdbcUtils;
 
 /**
- * JDBC - DriverManager 사용
+ * JDBC - DataSource 사용, JdbcUtils 사용
  */
 
 @Slf4j
-public class MemberRepositoryV0 {
+@AllArgsConstructor
+public class MemberRepositoryV1 {
+    private final DataSource dataSource;
+
     // FIXME : 멤버 저장
-    public Member save(Member member) {
+    public Member save(Member member){
         String sql = "insert into member(member_id, money) values (?,?)";
 
         Connection conn = null;
         PreparedStatement pstmt = null;
 
-        // DB 커낵션 획득.
-        conn = getConnection();
+
         try {
-            // DB 에 전달할 SQL 및 데이터 셋팅
+            conn = getConnection();
+
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, member.getMemberId());
             pstmt.setInt(2, member.getMoney());
 
-            // executeUpdate | 데이터를 변경할 때 사용
-            pstmt.executeUpdate(); // 실제 Query 실행.
+            pstmt.executeUpdate();
             return member;
         } catch (SQLException e) {
             log.error("[DB Error] ", e);
             throw new RuntimeException(e);
         }finally {
-            // 쿼리 실행 후 리소스 정리.
-            // 리소스 정리를 해주지 않을 경우 리소스 누수가 발생할 수 있음.
             close(conn, pstmt, null);
         }
     }
@@ -49,11 +52,6 @@ public class MemberRepositoryV0 {
 
         Connection conn = null;
         PreparedStatement pstmt = null;
-        /*
-         * ResultSet
-         * SelectQuery 결과가 순서대로 들어감.
-         * rs.next() | 커서를 다음으로 이동. 데이터가 있을 경우 true 반환. (초기 데이터 조회를 위해 한 번 실행해주어야함)
-         */
         ResultSet rs = null;
 
         try {
@@ -61,10 +59,8 @@ public class MemberRepositoryV0 {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, memberId);
 
-            // executeQuery | 데이터를 조회할 때 사용.
-            rs = pstmt.executeQuery(); // 실제 Query 실행.
+            rs = pstmt.executeQuery();
 
-            // 한 번만 호출하면 되기 때문에 IF 문 사용.
             if(rs.next()) {
                 Member member = new Member();
                 member.setMemberId(rs.getString("member_id"));
@@ -94,7 +90,7 @@ public class MemberRepositoryV0 {
             pstmt.setInt(1, money);
             pstmt.setString(2, memberId);
 
-            int resultSize = pstmt.executeUpdate(); // 쿼리를 실행하고 해당 쿼리의 영향을 받은 row 수를 반환.
+            int resultSize = pstmt.executeUpdate();
             log.info("[DB Update Success] resultSize = " + resultSize);
         }catch (SQLException e){
             log.error("[DB Connection Error] ", e);
@@ -116,7 +112,7 @@ public class MemberRepositoryV0 {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, memberId);
 
-            int resultSize = pstmt.executeUpdate(); // 쿼리를 실행하고 해당 쿼리의 영향을 받은 row 수를 반환.
+            int resultSize = pstmt.executeUpdate();
             log.info("[DB Update Success] resultSize = " + resultSize);
         }catch (SQLException e){
             log.error("[DB Connection Error] ", e);
@@ -127,32 +123,16 @@ public class MemberRepositoryV0 {
     }
 
     private void close(Connection conn, PreparedStatement pstmt, ResultSet rs) {
-        if(rs != null) {
-            try{
-                rs.close();
-            }catch (SQLException e){
-                log.error("[DB ResultSet Error] ", e);
-            }
-        }
-
-        if(pstmt != null) {
-            try {
-                pstmt.close();
-            }catch (SQLException e) {
-                log.error("[DB PreparedStatement Error] ", e);
-            }
-        }
-
-        if(conn != null) {
-            try{
-                conn.close();
-            }catch (SQLException e) {
-                log.error("[DB Connection Error] ", e);
-            }
-        }
+        JdbcUtils.closeResultSet(rs);
+        JdbcUtils.closeStatement(pstmt);
+        // PLUS : 커낵션 풀을 사용할 경우, connect 을 닫는 것이 아니라 사용했던 connection 을 pool 에 반환함.
+        JdbcUtils.closeConnection(conn);
     }
 
-    private static Connection getConnection() {
-        return DBConnectionUtil.getConnection();
+    private Connection getConnection() throws SQLException {
+        Connection conn  = dataSource.getConnection();
+        log.info("[DB Connection Success] conn = {}, class = {}",conn, conn.getClass());
+
+        return conn;
     }
 }
