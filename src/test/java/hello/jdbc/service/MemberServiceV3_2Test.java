@@ -1,7 +1,6 @@
 package hello.jdbc.service;
 
 import hello.jdbc.domain.Member;
-import hello.jdbc.repository.MemberRepositoryV2;
 import hello.jdbc.repository.MemberRepositoryV3;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,25 +15,24 @@ import java.sql.SQLException;
 import static hello.jdbc.connection.ConnectionConst.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 트랜잭션 - 트랜잭션 매니저
+ * 트랜잭션 - 트랜잭션 템플릿
  */
-class MemberServiceV3_1Test {
+class MemberServiceV3_2Test {
     public static final String MEMBER_A = "memberA";
     public static final String MEMBER_B = "memberB";
     public static final String MEMBER_EX = "ex";
 
     private MemberRepositoryV3 memberRepositoryV3;
-    private MemberServiceV3_1 memberService;
+    private MemberServiceV3_2 memberService;
 
     @BeforeEach
     void before(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
         PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
         memberRepositoryV3 = new MemberRepositoryV3(dataSource);
-        memberService = new MemberServiceV3_1(transactionManager, memberRepositoryV3);
+        memberService = new MemberServiceV3_2(transactionManager, memberRepositoryV3);
     }
 
     @AfterEach

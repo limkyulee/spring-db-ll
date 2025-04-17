@@ -38,4 +38,7 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	jvmArgs += [
+			"-javaagent:${classpath.find { it.name.contains('byte-buddy-agent') }.absolutePath}"
+	]
 }
