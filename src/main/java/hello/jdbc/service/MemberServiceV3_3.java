@@ -4,9 +4,7 @@ import hello.jdbc.domain.Member;
 import hello.jdbc.repository.MemberRepositoryV3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
 
@@ -24,7 +22,7 @@ public class MemberServiceV3_3 {
         bizLogic(fromId, toId, money);
     }
 
-    private void bizLogic(String fromId, String toId, int money) throws SQLException {
+    private void bizLogic(String fromId, String toId, int money){
         Member fromMember = memberRepositoryV3.findById(fromId);
         Member toMember = memberRepositoryV3.findById(toId);
 

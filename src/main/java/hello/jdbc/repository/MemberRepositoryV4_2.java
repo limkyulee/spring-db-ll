@@ -1,14 +1,12 @@
 package hello.jdbc.repository;
 
 import hello.jdbc.domain.Member;
-import hello.jdbc.repository.ex.MyDBException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
 import javax.sql.DataSource;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -17,6 +15,7 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
 
 /**
  * SQLExceptionTranslator 추가
+ * 예외 추상화
  */
 
 @Slf4j
